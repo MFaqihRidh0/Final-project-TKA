@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokoTKA — Order Processing Service</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Nav -->
+  <header class="nav">
+    <div class="brand"><span class="logo">🛍️</span> TokoTKA <small>· Flash Sale</small></div>
+    <div class="searchbar">
+      <input id="search" type="text" placeholder="Cari produk… (mis. Laptop, Sepatu)"
+             onkeydown="if(event.key==='Enter')loadProducts()" />
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" id="acct-btn" onclick="openAccount()">👤 <span class="label" id="acct-label">Masuk</span></button>
+      <button class="icon-btn primary" onclick="openCart()">🛒 <span class="label">Keranjang</span>
+        <span class="cart-count" id="cart-count" style="display:none">0</span></button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="tag">⚡ FLASH SALE HARI INI</span>
+      <h1>Belanja Cepat, Tahan Lonjakan Traffic</h1>
+      <p>Order Processing Service — Final Project Teknologi Komputasi Awan. Pilih produk, masukkan keranjang, checkout.</p>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="cat-bar" id="cat-bar"></div>
+    <div class="section-head">
+      <h2>Produk Pilihan</h2>
+      <span class="muted" id="prod-meta"></span>
+    </div>
+    <div id="prod-grid" class="prod-grid"></div>
+  </main>
+
+  <!-- Cart drawer -->
+  <div class="overlay" id="overlay" onclick="closeAll()"></div>
+  <aside class="drawer" id="cart-drawer">
+    <div class="drawer-head"><h3>🛒 Keranjang</h3><button class="x" onclick="closeAll()">✕</button></div>
+    <div class="drawer-body" id="cart-items"></div>
+    <div class="drawer-foot" id="cart-foot"></div>
+  </aside>
+
+  <!-- Auth modal -->
+  <div class="modal" id="auth-modal">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="auth-title">Masuk ke TokoTKA</h3><button class="x" onclick="closeAll()">✕</button></div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab active" id="tab-login" onclick="setAuthMode('login')">Login</button>
+          <button class="tab" id="tab-reg" onclick="setAuthMode('register')">Daftar</button>
+        </div>
+        <div class="field" id="name-field" style="display:none">
+          <label>Nama</label><input type="text" id="reg-name" placeholder="Nama lengkap" />
+        </div>
+        <div class="field"><label>Email</label><input type="text" id="email" placeholder="admin1@tka.its.ac.id" /></div>
+        <div class="field"><label>Password</label><input type="text" id="password" placeholder="Admin@12345" /></div>
+        <button class="btn" style="width:100%" id="auth-submit" onclick="submitAuth()">Login</button>
+        <p class="hint">Akun seed admin: <code>admin1@tka.its.ac.id / Admin@12345</code> (bisa update status pesanan).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account / Orders modal -->
+  <div class="modal" id="orders-modal">
+    <div class="modal-card wide">
+      <div class="modal-head"><h3 id="orders-title">Akun & Pesanan</h3><button class="x" onclick="closeAll()">✕</button></div>
+      <div class="modal-body">
+        <div class="row-btns" style="margin-bottom:16px">
+          <button class="btn-ghost btn" onclick="getOrderHistory()">🔄 Muat Riwayat</button>
+          <button class="btn-ghost btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="field">
+          <label>Cek detail pesanan (order_id)</label>
+          <div class="row-btns">
+            <input type="text" id="lookup-id" placeholder="order_id" />
+            <button class="btn" onclick="getOrderStatus()">Cek</button>
+          </div>
+        </div>
+
+        <div id="admin-panel" style="display:none">
+          <div class="field">
+            <label>Update status (admin)</label>
+            <div class="row-btns">
+              <input type="text" id="upd-id" placeholder="order_id" />
+              <select id="upd-status" style="max-width:150px">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="btn" onclick="updateOrderStatus()">Update</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:1rem;margin:18px 0 10px">Riwayat Pesanan</h3>
+        <div id="order-list"><p class="hint">Klik "Muat Riwayat".</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+
+  <script>
+    // ── Konfigurasi ──────────────────────────────────────────────
+    const API_BASE = "/api";   // same-origin via reverse proxy Nginx FE → vm-lb
+    let token = localStorage.getItem("token") || null;
+    let role  = localStorage.getItem("role")  || null;
+    let cart  = JSON.parse(localStorage.getItem("cart") || "[]");
+    let allProducts = [];
+    let activeCat = "Semua";
+    let authMode = "login";
+
+    const CATS = ["Semua","Elektronik","Smartphone","Fashion","Olahraga","Buku","Rumah Tangga","Makanan"];
+    const ICON = { Elektronik:"💻", Smartphone:"📱", Fashion:"👕", Olahraga:"⚽", Buku:"📚", "Rumah Tangga":"🏠", Makanan:"🍜" };
+    // Fallback demo (tampil saat backend belum konek — preview lokal). Saat live, data asli dipakai.
+    const DEMO = [
+      { _id:"d1", name:"Laptop Gaming ASUS ROG Strix G16", category:"Elektronik", price:24999000, stock:12, rating:4.8 },
+      { _id:"d2", name:"iPhone 15 Pro Max 256GB", category:"Smartphone", price:21499000, stock:7, rating:4.9 },
+      { _id:"d3", name:"Sepatu Lari Nike Pegasus 41", category:"Olahraga", price:1899000, stock:34, rating:4.6 },
+      { _id:"d4", name:"Jaket Hoodie Premium Unisex", category:"Fashion", price:299000, stock:120, rating:4.4 },
+      { _id:"d5", name:"Atomic Habits — James Clear", category:"Buku", price:98000, stock:200, rating:4.9 },
+      { _id:"d6", name:"Air Fryer Philips 4.1L", category:"Rumah Tangga", price:1290000, stock:18, rating:4.7 },
+      { _id:"d7", name:"Kopi Arabika Gayo 1kg", category:"Makanan", price:145000, stock:80, rating:4.8 },
+      { _id:"d8", name:"Samsung Galaxy Buds3 Pro", category:"Elektronik", price:2799000, stock:25, rating:4.5 },
+      { _id:"d9", name:"Mechanical Keyboard 75% RGB", category:"Elektronik", price:759000, stock:40, rating:4.6 },
+      { _id:"d10", name:"Tumbler Stainless 1L", category:"Rumah Tangga", price:89000, stock:300, rating:4.3 },
+    ];
+
+    // ── Helpers ──────────────────────────────────────────────────
+    const rp = n => "Rp" + Number(n||0).toLocaleString("id-ID");
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c]));
+    const hue = s => { let h=0; for (const c of String(s)) h=(h*31+c.charCodeAt(0))%360; return h; };
+    const grad = s => `linear-gradient(135deg,hsl(${hue(s)} 70% 60%),hsl(${(hue(s)+40)%360} 70% 48%))`;
+
+    function toast(msg, ok=true) {
+      const t = document.createElement("div");
+      t.className = "toast " + (ok?"ok":"err"); t.textContent = msg;
+      document.getElementById("toast-wrap").appendChild(t);
+      setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 2800);
+    }
+    function authHeaders(extra={}) { return token ? {...extra, Authorization:`Bearer ${token}`} : extra; }
+    async function apiFetch(path, opts={}) {
+      const res = await fetch(`${API_BASE}${path}`, opts);
+      let data; try { data = await res.json(); } catch { data = {}; }
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    // ── UI open/close ────────────────────────────────────────────
+    function showOverlay(on){ document.getElementById("overlay").classList.toggle("show", on); }
+    function openCart(){ renderCart(); document.getElementById("cart-drawer").classList.add("show"); showOverlay(true); }
+    function openAccount(){ token ? openOrders() : openAuth(); }
+    function openAuth(){ document.getElementById("auth-modal").classList.add("show"); showOverlay(true); }
+    function openOrders(){
+      document.getElementById("admin-panel").style.display = role==="admin" ? "block" : "none";
+      document.getElementById("orders-title").textContent = `Hai, ${localStorage.getItem("name")||"User"} (${role})`;
+      document.getElementById("orders-modal").classList.add("show"); showOverlay(true);
+    }
+    function closeAll(){
+      document.querySelectorAll(".modal,.drawer").forEach(e=>e.classList.remove("show"));
+      showOverlay(false);
+    }
+
+    // ── Auth ─────────────────────────────────────────────────────
+    function setAuthMode(m){
+      authMode = m;
+      document.getElementById("tab-login").classList.toggle("active", m==="login");
+      document.getElementById("tab-reg").classList.toggle("active", m==="register");
+      document.getElementById("name-field").style.display = m==="register" ? "block" : "none";
+      document.getElementById("auth-submit").textContent = m==="login" ? "Login" : "Daftar";
+      document.getElementById("auth-title").textContent = m==="login" ? "Masuk ke TokoTKA" : "Daftar Akun Baru";
+    }
+    async function submitAuth(){
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if(!email||!password) return toast("Email & password wajib", false);
+      const body = authMode==="login"
+        ? { email, password }
+        : { name: document.getElementById("reg-name").value.trim() || email.split("@")[0], email, password };
+      const { ok, data } = await apiFetch(`/auth/${authMode}`, {
+        method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body)
+      });
+      if(ok && data.token){
+        token=data.token; role=data.user.role;
+        localStorage.setItem("token",token); localStorage.setItem("role",role); localStorage.setItem("name",data.user.name);
+        refreshAcct(); closeAll(); toast(`Halo, ${data.user.name}!`);
+      } else toast(data.error || "Gagal autentikasi", false);
+    }
+    function logout(){
+      token=role=null; ["token","role","name"].forEach(k=>localStorage.removeItem(k));
+      refreshAcct(); closeAll(); toast("Sudah logout");
+    }
+    function refreshAcct(){
+      document.getElementById("acct-label").textContent = token ? (localStorage.getItem("name")||"Akun") : "Masuk";
+    }
+
+    // ── Produk ───────────────────────────────────────────────────
+    function renderCats(){
+      document.getElementById("cat-bar").innerHTML = CATS.map(c =>
+        `<button class="chip ${c===activeCat?"active":""}" onclick="filterCat('${c}')">${c}</button>`).join("");
+    }
+    function filterCat(c){ activeCat=c; renderCats(); renderProducts(); }
+
+    async function loadProducts(){
+      const grid = document.getElementById("prod-grid");
+      grid.innerHTML = Array(8).fill('<div class="skeleton"></div>').join("");
+      const search = document.getElementById("search").value.trim();
+      try {
+        const qs = "?limit=50" + (search ? `&search=${encodeURIComponent(search)}` : "");
+        const { ok, data } = await apiFetch(`/products${qs}`);
+        if(!ok || !data.data) throw new Error("no data");
+        allProducts = data.data;
+      } catch {
+        // Preview / backend belum konek → demo
+        allProducts = DEMO.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()));
+        toast("Mode preview (data demo) — backend belum terhubung", false);
+      }
+      renderProducts();
+    }
+    function renderProducts(){
+      const list = activeCat==="Semua" ? allProducts : allProducts.filter(p=>p.category===activeCat);
+      document.getElementById("prod-meta").textContent = `${list.length} produk`;
+      const grid = document.getElementById("prod-grid");
+      if(!list.length){ grid.innerHTML = `<div class="empty">Tidak ada produk.</div>`; return; }
+      grid.innerHTML = list.map(p => {
+        const thumb = p.image_url
+          ? `<img src="${esc(p.image_url)}" onerror="this.style.display='none';this.parentElement.style.background='${grad(p.name)}'" alt="">`
+          : (ICON[p.category] || "🛍️");
+        return `<div class="prod">
+          <div class="thumb" style="background:${grad(p.name)}">
+            <span class="sale-tag">SALE</span>${thumb}
+          </div>
+          <div class="body">
+            <div class="cat">${esc(p.category||"-")}</div>
+            <div class="name">${esc(p.name)}</div>
+            <div class="rate">⭐ ${p.rating ?? "—"} · stok ${p.stock ?? "—"}</div>
+            <div class="price">${rp(p.price)}</div>
+            <button class="add" onclick='addToCart(${JSON.stringify({_id:p._id,name:p.name,price:p.price,category:p.category}).replace(/'/g,"&#39;")})'>+ Keranjang</button>
+          </div></div>`;
+      }).join("");
+    }
+
+    // ── Cart ─────────────────────────────────────────────────────
+    function saveCart(){ localStorage.setItem("cart", JSON.stringify(cart)); refreshCartCount(); }
+    function refreshCartCount(){
+      const n = cart.reduce((s,c)=>s+c.qty,0);
+      const el = document.getElementById("cart-count");
+      el.textContent = n; el.style.display = n ? "grid" : "none";
+    }
+    function addToCart(p){
+      const found = cart.find(c=>c.product_id===p._id);
+      if(found) found.qty++; else cart.push({ product_id:p._id, name:p.name, price:p.price, category:p.category, qty:1 });
+      saveCart(); toast(`+ ${p.name}`);
+    }
+    function changeQty(i,d){ cart[i].qty+=d; if(cart[i].qty<1) cart.splice(i,1); saveCart(); renderCart(); }
+    function renderCart(){
+      const body = document.getElementById("cart-items");
+      const foot = document.getElementById("cart-foot");
+      if(!cart.length){
+        body.innerHTML = `<p class="hint" style="text-align:center;padding:40px 0">Keranjang kosong 🛒</p>`;
+        foot.innerHTML = ""; return;
+      }
+      body.innerHTML = cart.map((c,i)=>`
+        <div class="citem">
+          <div class="ci-thumb" style="background:${grad(c.name)}">${ICON[c.category]||"🛍️"}</div>
+          <div style="flex:1">
+            <div class="ci-name">${esc(c.name)}</div>
+            <div class="ci-price">${rp(c.price)}</div>
+            <div class="stepper"><button onclick="changeQty(${i},-1)">−</button><span>${c.qty}</span><button onclick="changeQty(${i},1)">+</button></div>
+          </div>
+          <button class="ci-del" onclick="changeQty(${i},-99)">Hapus</button>
+        </div>`).join("");
+      const sub = cart.reduce((s,c)=>s+c.price*c.qty,0), ship = 15000;
+      foot.innerHTML = `
+        <div class="row"><span>Subtotal</span><span>${rp(sub)}</span></div>
+        <div class="row"><span>Ongkir</span><span>${rp(ship)}</span></div>
+        <div class="row total"><span>Total</span><span>${rp(sub+ship)}</span></div>
+        <label>Metode Pembayaran</label>
+        <select id="pay"><option value="transfer_bank">Transfer Bank</option><option value="gopay">GoPay</option>
+          <option value="ovo">OVO</option><option value="dana">DANA</option><option value="qris">QRIS</option><option value="kartu_kredit">Kartu Kredit</option></select>
+        <label>Alamat</label><input id="addr" placeholder="Jl. Contoh No. 1, Surabaya" />
+        <button class="btn-block" onclick="checkout()">Checkout Sekarang</button>`;
+    }
+    async function checkout(){
+      if(!token){ closeAll(); openAuth(); return toast("Login dulu untuk checkout", false); }
+      if(!cart.length) return toast("Keranjang kosong", false);
+      const payload = {
+        items: cart.map(c=>({ product_id:c.product_id, qty:c.qty })),
+        payment_method: document.getElementById("pay").value,
+        address: document.getElementById("addr").value.trim(),
+        shipping_cost: 15000
+      };
+      const { ok, data } = await apiFetch("/orders", {
+        method:"POST", headers: authHeaders({ "Content-Type":"application/json" }), body: JSON.stringify(payload)
+      });
+      if(ok){ toast("✅ Pesanan dibuat: " + (data.order_id||"")); cart=[]; saveCart(); closeAll(); }
+      else toast(data.error || "Checkout gagal (cek login/stok)", false);
+    }
+
+    // ── Orders ───────────────────────────────────────────────────
+    async function getOrderStatus(){
+      const id = document.getElementById("lookup-id").value.trim();
+      if(!id) return toast("Order ID wajib", false);
+      const { ok, data } = await apiFetch(`/orders/${id}`, { headers: authHeaders() });
+      ok ? renderOrders([data]) : toast(data.error || "Tidak ditemukan", false);
+    }
+    async function updateOrderStatus(){
+      if(role!=="admin") return toast("Hanya admin", false);
+      const id = document.getElementById("upd-id").value.trim();
+      const status = document.getElementById("upd-status").value;
+      if(!id) return toast("Order ID wajib", false);
+      const { ok, data } = await apiFetch(`/orders/${id}/status`, {
+        method:"PUT", headers: authHeaders({ "Content-Type":"application/json" }), body: JSON.stringify({ status })
+      });
+      toast(ok ? `Status → ${status}` : (data.error||"Gagal"), ok);
+      if(ok) getOrderHistory();
+    }
+    async function getOrderHistory(){
+      const { ok, data } = await apiFetch(`/orders?limit=20`, { headers: authHeaders() });
+      ok ? renderOrders(data.data||[]) : toast(data.error || "Gagal memuat", false);
+    }
+    function renderOrders(list){
+      const wrap = document.getElementById("order-list");
+      if(!list.length){ wrap.innerHTML = `<p class="hint">Belum ada pesanan.</p>`; return; }
+      wrap.innerHTML = list.map(o=>`
+        <div class="order">
+          <div class="top"><span class="total">${rp(o.total)}</span><span class="status status-${o.status}">${o.status}</span></div>
+          <div class="oid">${esc(o.order_id||"")}</div>
+          <div class="meta">${esc(o.customer_name||"")} · ${esc(o.payment_method||"")} · ${o.created_at?new Date(o.created_at).toLocaleString("id-ID"):""}</div>
+        </div>`).join("");
+    }
+
+    // ── Init ─────────────────────────────────────────────────────
+    renderCats(); refreshAcct(); refreshCartCount(); loadProducts();
+  </script>
+</body>
+</html>

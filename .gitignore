@@ -1,0 +1,19 @@
+# Env files dengan secret (JWT_SECRET dll) — jangan commit
+*.env
+!*.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Locust cache
+.locust/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
