@@ -2,19 +2,19 @@
    Gaya e-commerce/marketplace: nav + search, hero, grid produk, cart drawer, modal. */
 
 :root {
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --accent: #f59e0b;       /* harga / sale */
+  --primary: #f97316;       /* orange 500 */
+  --primary-dark: #ea580c;  /* orange 600 */
+  --accent: #f59e0b;        /* amber — harga */
   --accent-dark: #d97706;
-  --sale: #ef4444;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --line: #e7eaf0;
-  --bg: #f4f5f9;
+  --sale: #e11d48;          /* rose — label diskon */
+  --ink: #1c1410;
+  --muted: #78716c;         /* warm gray */
+  --line: #eee7e1;
+  --bg: #fbf7f3;            /* warm off-white */
   --card: #ffffff;
   --radius: 14px;
-  --shadow: 0 6px 24px -10px rgba(15, 23, 42, 0.18);
-  --shadow-hover: 0 16px 34px -14px rgba(79, 70, 229, 0.45);
+  --shadow: 0 6px 24px -10px rgba(124, 45, 18, 0.16);
+  --shadow-hover: 0 16px 34px -14px rgba(249, 115, 22, 0.45);
   --ok: #10b981; --err: #ef4444;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,7 +36,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; white-space: nowrap; }
 .brand .logo {
   width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 1.15rem;
-  background: linear-gradient(135deg, var(--primary), #7c3aed); color: #fff;
+  background: linear-gradient(135deg, #fb923c, #ea580c); color: #fff;
 }
 .brand small { color: var(--accent); }
 .searchbar { flex: 1; max-width: 560px; position: relative; }
@@ -44,7 +44,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   width: 100%; padding: 11px 16px 11px 42px; border: 1.5px solid var(--line);
   border-radius: 999px; font-size: 0.95rem; outline: none; background: #f8fafc; transition: .15s;
 }
-.searchbar input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(79,70,229,.12); }
+.searchbar input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(249,115,22,.16); }
 .searchbar::before { content: "🔍"; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: .9rem; opacity: .6; }
 .nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .icon-btn {
@@ -61,21 +61,32 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 
 /* ── Hero ──────────────────────────────────────────── */
-.hero {
-  margin: 22px auto 0; max-width: 1200px; padding: 0 24px;
-}
+.hero { margin: 22px auto 0; max-width: 1200px; padding: 0 24px; }
 .hero-inner {
-  border-radius: 20px; padding: 40px 44px; color: #fff; position: relative; overflow: hidden;
-  background: linear-gradient(120deg, #4f46e5, #7c3aed 55%, #db2777);
+  position: relative; border-radius: 22px; overflow: hidden; min-height: 300px;
+  display: flex; align-items: center; padding: 48px 52px; color: #fff;
+  background:
+    linear-gradient(100deg, rgba(124,45,18,.96) 0%, rgba(234,88,12,.88) 38%, rgba(249,115,22,.52) 66%, rgba(245,158,11,.28) 100%),
+    url("https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1280&q=80&auto=format&fit=crop") center/cover no-repeat,
+    #7c2d12;
   box-shadow: var(--shadow);
 }
-.hero-inner::after {
-  content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px;
-  background: rgba(255,255,255,.12); border-radius: 50%;
-}
-.hero .tag { display: inline-block; background: rgba(255,255,255,.2); padding: 5px 14px; border-radius: 999px; font-weight: 700; font-size: .78rem; letter-spacing: .5px; }
-.hero h1 { font-size: 2.1rem; margin: 14px 0 8px; letter-spacing: -.6px; }
-.hero p { opacity: .92; font-size: 1rem; max-width: 520px; }
+.hero-text { position: relative; max-width: 580px; }
+.hero .tag { display: inline-block; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25); padding: 6px 15px; border-radius: 999px; font-weight: 700; font-size: .76rem; letter-spacing: .6px; backdrop-filter: blur(4px); }
+.hero h1 { font-size: 2.5rem; line-height: 1.08; margin: 16px 0 10px; letter-spacing: -.8px; text-shadow: 0 2px 16px rgba(0,0,0,.25); }
+.hero p { opacity: .94; font-size: 1.02rem; max-width: 480px; line-height: 1.5; }
+.hero-cta { display: flex; align-items: center; gap: 18px; margin-top: 24px; flex-wrap: wrap; }
+.shop-btn { background: #fff; color: var(--primary-dark); font-weight: 800; padding: 13px 28px; border-radius: 999px; font-size: .95rem; box-shadow: 0 12px 26px -10px rgba(0,0,0,.55); transition: transform .12s, box-shadow .15s; }
+.shop-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 30px -10px rgba(0,0,0,.6); }
+.hero-note { font-size: .86rem; font-weight: 600; opacity: .92; }
+
+/* ── Trust strip ───────────────────────────────────── */
+.trust { max-width: 1200px; margin: 16px auto 0; padding: 0 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.trust .item { display: flex; align-items: center; gap: 13px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; box-shadow: 0 4px 14px -8px rgba(15,23,42,.15); }
+.trust .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 1.25rem; background: #fff1e6; flex-shrink: 0; }
+.trust .t { font-weight: 700; font-size: .9rem; }
+.trust .s { font-size: .76rem; color: var(--muted); }
+@media (max-width: 720px) { .trust { grid-template-columns: 1fr; } .hero h1 { font-size: 1.9rem; } }
 
 /* ── Layout ────────────────────────────────────────── */
 .container { max-width: 1200px; margin: 0 auto; padding: 26px 24px 60px; }
@@ -113,7 +124,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .prod .price { font-size: 1.15rem; font-weight: 800; color: var(--ink); margin-top: 2px; }
 .prod .price small { color: var(--muted); text-decoration: line-through; font-weight: 500; font-size: .8rem; margin-left: 6px; }
 .prod .add {
-  margin-top: 8px; background: #eef2ff; color: var(--primary-dark); font-weight: 700; padding: 9px; border-radius: 9px; font-size: .85rem; transition: .15s;
+  margin-top: 8px; background: #fff1e6; color: var(--primary-dark); font-weight: 700; padding: 9px; border-radius: 9px; font-size: .85rem; transition: .15s;
 }
 .prod .add:hover { background: var(--primary); color: #fff; }
 .skeleton { height: 300px; border-radius: var(--radius); background: linear-gradient(90deg,#eef1f6,#f7f9fc,#eef1f6); background-size: 200% 100%; animation: sh 1.2s infinite; }
@@ -161,7 +172,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
 .field input, .field select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: .95rem; outline: none; }
-.field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,70,229,.12); }
+.field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(249,115,22,.16); }
 .btn { background: var(--primary); color: #fff; font-weight: 700; padding: 12px 20px; border-radius: 10px; font-size: .92rem; transition: .15s; }
 .btn:hover { background: var(--primary-dark); }
 .btn-ghost { background: #fff; border: 1.5px solid var(--line); color: var(--ink); }
