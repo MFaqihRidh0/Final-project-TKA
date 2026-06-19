@@ -8,15 +8,17 @@ repo kelompok (`fp-tka-26-main/configs/`) saat handoff ke Tim C.
 
 | Hostname | Role                 | Internal IP | Spec        | Harga |
 |----------|----------------------|-------------|-------------|-------|
-| vm-lb    | Nginx Load Balancer  | 10.0.0.10   | 1vCPU/1GB   | $6    |
-| vm-app1  | Flask + Gunicorn     | 10.0.0.11   | 1vCPU/2GB   | $12   |
-| vm-app2  | Flask + Gunicorn     | 10.0.0.12   | 1vCPU/2GB   | $12   |
-| vm-db    | MongoDB              | 10.0.0.13   | 2vCPU/4GB   | $24   |
-| vm-fe    | Nginx static         | 10.0.0.14   | 1vCPU/1GB   | $6    |
-|          |                      |             | **TOTAL**   | **$60** |
+| Hostname | Role | Internal IP | Spec | Harga |
+| --- | --- | --- | --- | --- |
+| vm-lb | Nginx Load Balancer | 10.0.0.10 | Standard_B1s (1vCPU/1GB) | ~$8 |
+| vm-app1 | Flask + Gunicorn | 10.0.0.11 | Standard_B1ms (1vCPU/2GB) | ~$15 |
+| vm-app2 | Flask + Gunicorn | 10.0.0.12 | Standard_B1ms (1vCPU/2GB) | ~$15 |
+| vm-db | MongoDB | 10.0.0.13 | Standard_B2s (2vCPU/4GB) | ~$30 |
+| vm-fe | Nginx static | 10.0.0.14 | Standard_B1s (1vCPU/1GB) | ~$8 |
+| | | | **TOTAL** | **~$76** |
 
-GCP region `asia-southeast2` (Jakarta). VPC `10.0.0.0/24`. Public IP hanya pada
-vm-lb & vm-fe.
+Azure region `southeastasia` (Singapore). VNet `10.0.0.0/24`. Public IP hanya pada
+vm-lb & vm-fe. VM internal (app1, app2, db) diakses via SSH jump host vm-lb.
 
 ## Struktur Folder
 
