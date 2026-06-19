@@ -1,6 +1,7 @@
 # Phase 3 — Nginx Load Balancer (vm-lb, 10.0.0.10)
 
-Reverse proxy round-robin ke vm-app1 & vm-app2. Komponen paling berdampak ke skor RPS.
+Reverse proxy ke vm-app (10.0.0.11). Komponen paling berdampak ke skor RPS.
+Skema 3-VM: 1 backend. Untuk round-robin, aktifkan vm-app2 di `nginx-lb-fe.conf`.
 
 ## Langkah
 ```bash
@@ -22,10 +23,8 @@ curl http://<public-ip-lb>/products?limit=5       # → 200, data seed
 
 # POST order nyata masuk MongoDB (butuh token; cek alur penuh di verify_endpoints.sh nanti)
 
-# Uji High-Availability (load balancing bekerja):
-gcloud compute ssh vm-app1 --tunnel-through-iap --command 'sudo systemctl stop orderapp'
-curl http://<public-ip-lb>/health                 # tetap 200 (dilayani vm-app2)
-gcloud compute ssh vm-app1 --tunnel-through-iap --command 'sudo systemctl start orderapp'
+# Uji app bisa diakses via LB:
+curl http://<public-ip-lb>/api/health             # → {"status":"ok"} (dari vm-app)
 ```
 
 ## Tuning (alasan, untuk laporan Tim C)
@@ -53,6 +52,5 @@ Catat hasil RPS tiap strategy untuk bagian eksplorasi di laporan.
 ## Bukti untuk Tim C
 - [ ] `nginx -t` (config test passed)
 - [ ] `curl http://<public-ip>/health` dari internet → 200
-- [ ] Demo HA: vm-app1 mati, request tetap jalan
-- [ ] File `/etc/nginx/nginx.conf` (= `configs/nginx-lb-main.conf`) + `sites-available/orderapp` (= `configs/nginx-lb.conf`)
+- [ ] File `/etc/nginx/nginx.conf` (= `configs/nginx-lb-main.conf`) + `sites-available/orderapp` (= `configs/nginx-lb-fe.conf`)
 - [ ] Catatan tuning (tabel di atas)

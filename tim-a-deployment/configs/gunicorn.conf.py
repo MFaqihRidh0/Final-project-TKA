@@ -1,4 +1,4 @@
-# gunicorn.conf.py — vm-app1 & vm-app2 (identik)
+# gunicorn.conf.py — vm-app (10.0.0.11)
 # Order Processing Service — FP TKA 2026 (Tim A, Phase 2)
 # Tunable via env (di-set lewat orderapp.env). Tim B akan eksperimen worker count.
 import os

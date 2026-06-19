@@ -1,5 +1,5 @@
 [Unit]
-# orderapp.service — Gunicorn untuk Order Processing Service (vm-app1 & vm-app2)
+# orderapp.service — Gunicorn untuk Order Processing Service (vm-app, 10.0.0.11)
 # FP TKA 2026 — Tim A (Phase 2)
 Description=Order Processing Service (Flask + Gunicorn)
 After=network-online.target

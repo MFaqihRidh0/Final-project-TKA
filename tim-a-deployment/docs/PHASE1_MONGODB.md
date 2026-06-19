@@ -1,7 +1,7 @@
 # Phase 1 — MongoDB Setup (vm-db, 10.0.0.13)
 
 Target: Ubuntu 22.04 LTS, MongoDB 7.0, 2vCPU/4GB. Tujuan: DB siap diconnect
-oleh vm-app1/vm-app2, dengan index lengkap dan seed data ter-restore.
+oleh vm-app (10.0.0.11), dengan index lengkap dan seed data ter-restore.
 
 ## Langkah Eksekusi
 
@@ -40,7 +40,7 @@ mongosh "mongodb://10.0.0.13:27017/orderdb" --quiet \
 mongosh "mongodb://10.0.0.13:27017/orderdb" --quiet \
   --eval 'db.orders.countDocuments()'                    # → 10000 (seed utuh)
 ```
-Dari vm-app1 nanti (uji isolasi network):
+Dari vm-app nanti (uji isolasi network):
 ```bash
 nc -zv 10.0.0.13 27017          # dari vm-app → OK
 nc -zv 10.0.0.13 27017          # dari luar subnet → refused/timeout

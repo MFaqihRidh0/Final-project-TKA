@@ -26,18 +26,28 @@ vm-lb. VM internal (vm-app, vm-db) diakses via SSH jump host vm-lb.
 tim-a-deployment/
 ├── README.md                 ← file ini (progress tracker)
 ├── configs/                  ← config final, di-commit ke repo
-│   ├── mongod.conf
-│   ├── nginx-lb.conf         (Phase 3)
-│   ├── nginx-fe.conf         (Phase 4)
-│   └── orderapp.service      (Phase 2)
+│   ├── mongod.conf           (vm-db)
+│   ├── nginx-lb-fe.conf      (vm-lb — LB + frontend gabung, Phase 3+4)
+│   ├── nginx-lb-main.conf    (nginx.conf tuning high-concurrency)
+│   ├── gunicorn.conf.py      (vm-app)
+│   └── orderapp.service      (vm-app, systemd)
 ├── scripts/
-│   ├── 01_provision_gcp.sh   ← gcloud create VM + VPC + firewall (opsional)
+│   ├── 01_provision_azure.sh ← az create 3 VM + VNet + NSG (skema 6 vCPU)
+│   ├── 01_provision_gcp.sh   ← arsip GCP (tidak dipakai)
 │   ├── 10_db_install.sh      ← install MongoDB 7.0 di vm-db
 │   ├── 11_db_init.js         ← buat index orders/products/users (mongosh)
+│   ├── 20_app_setup.sh       ← Flask + Gunicorn di vm-app
+│   ├── 30_lb_setup.sh        ← Nginx LB + Frontend di vm-lb
 │   ├── flush_orders.sh       ← untuk Tim B (Phase 6)
 │   └── verify_endpoints.sh   ← E2E test (Phase 5)
 └── docs/
-    └── PHASE1_MONGODB.md     ← langkah + bukti untuk Tim C
+    ├── PHASE0_PROVISION.md   ← topologi + SSH/SCP commands
+    ├── PHASE1_MONGODB.md     ← install + seed + index
+    ├── PHASE2_APP.md         ← Flask + Gunicorn setup
+    ├── PHASE3_LB.md          ← Nginx LB setup
+    ├── PHASE4_FE.md          ← Frontend (digabung Phase 3)
+    ├── PHASE5_VERIFY.md      ← E2E verification
+    └── PHASE6_HANDOFF.md     ← handoff Tim B & Tim C
 ```
 
 ## Catatan Penting (Reality Check vs Briefing)
@@ -63,7 +73,7 @@ boleh di-flush antar skenario.
 
 - [~] Phase 0 — Provision Azure (4 VM, VNet, NSG) — `01_provision_azure.sh` siap
 - [~] Phase 1 — MongoDB setup (vm-db) — artifacts dibuat, eksekusi pending
-- [~] Phase 2 — App server (vm-app1, vm-app2) — artifacts dibuat, eksekusi pending
+- [~] Phase 2 — App server (vm-app 10.0.0.11) — artifacts dibuat, eksekusi pending
 - [~] Phase 3 — Nginx LB + Frontend (vm-lb, Opsi A) — artifacts dibuat, eksekusi pending
 - [~] Phase 4 — (digabung ke Phase 3 via Opsi A — vm-fe tidak terpisah)
 - [~] Phase 5 — E2E verification — verify_endpoints.sh siap (JWT-aware)

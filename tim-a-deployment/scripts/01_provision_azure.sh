@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 01_provision_azure.sh — Provision 5 VM + VNet + NSG di Azure
+# 01_provision_azure.sh — Provision 3 VM + VNet + NSG di Azure (skema 6 vCPU)
 # FP TKA 2026 — Tim A (Phase 0). Region southeastasia (Singapore).
 #
 # Prasyarat: az login && az account set --subscription <ID>
@@ -16,10 +16,8 @@ ADDR_PREFIX="10.0.0.0/24"
 IMG="Ubuntu2204"
 ADMIN="azureuser"
 
-# Machine sizes
-SZ_SMALL="Standard_B1s"    # 1vCPU/1GB  — vm-lb, vm-fe
-SZ_APP="Standard_B1ms"     # 1vCPU/2GB  — vm-app1, vm-app2
-SZ_DB="Standard_B2s"       # 2vCPU/4GB  — vm-db
+# Machine sizes — semua Standard_B2s (2vCPU/4GB, ~$30/bulan)
+SZ_ALL="Standard_B2s"
 
 echo "Resource Group : $RG"
 echo "Location       : $LOCATION"

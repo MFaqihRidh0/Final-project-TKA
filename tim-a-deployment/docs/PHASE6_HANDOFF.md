@@ -56,7 +56,7 @@ fp-tka-26-main/
 │   ├── nginx-lb.conf
 │   └── nginx-fe.conf
 ├── scripts/
-│   ├── 01_provision_gcp.sh
+│   ├── 01_provision_azure.sh
 │   ├── 10_db_install.sh
 │   ├── 11_db_init.js
 │   ├── 20_app_setup.sh
@@ -79,10 +79,10 @@ Lihat checklist "Bukti untuk Tim C" di tiap `docs/PHASEx_*.md`.
 
 ## Checklist final sebelum "Tim A selesai"
 
-- [ ] 4 VM hidup & accessible via SSH (vm-lb langsung, vm-app1/app2/db via jump host)
+- [ ] 3 VM hidup & accessible via SSH (vm-lb langsung, vm-app/vm-db via jump host)
 - [ ] MongoDB running, index lengkap, seed ter-restore (10.000 orders)
-- [ ] vm-app1 & vm-app2 jalan via systemd, JWT_SECRET identik
-- [ ] Nginx LB round-robin terverifikasi (HA: matikan 1 app, tetap jalan)
+- [ ] vm-app jalan via systemd, JWT_SECRET tersimpan
+- [ ] Nginx LB + Frontend terverifikasi (curl /health → 200, buka browser → toko tampil)
 - [ ] Frontend accessible publik, login → produk → checkout → riwayat OK
 - [ ] `verify_endpoints.sh` → 6 passed, 0 failed
 - [ ] Firewall: :5000 & :27017 tidak publik

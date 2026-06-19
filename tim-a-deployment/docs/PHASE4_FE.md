@@ -1,6 +1,6 @@
-# Phase 4 — Frontend (vm-fe, 10.0.0.14)
+# Phase 4 — Frontend (digabung ke vm-lb, Opsi A)
 
-Nginx serve static `index.html` + `styles.css`, plus reverse proxy `/api` → vm-lb.
+Nginx serve static `index.html` + `styles.css` di vm-lb (10.0.0.10). Tidak ada vm-fe terpisah.
 
 ## ⚠️ Frontend di-ADAPTASI ke backend asli
 Frontend bawaan dosen (`Resources/FE/`) dibuat untuk API versi sederhana
