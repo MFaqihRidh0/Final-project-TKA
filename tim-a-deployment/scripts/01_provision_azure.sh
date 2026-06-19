@@ -88,9 +88,11 @@ create_vm() {
     --no-wait
 }
 
-# VM dengan public IP (accessible dari internet)
-create_vm vm-lb  "$SZ_SMALL" "10.0.0.10" "vm-lb-ip"
-create_vm vm-fe  "$SZ_SMALL" "10.0.0.14" "vm-fe-ip"
+# Opsi A: vm-lb juga serve frontend (vm-fe dihapus, hemat 1 vCPU)
+# Total vCPU: vm-lb(1) + vm-app1(1) + vm-app2(1) + vm-db(2) = 5 vCPU
+
+# VM dengan public IP
+create_vm vm-lb   "$SZ_SMALL" "10.0.0.10" "vm-lb-ip"
 
 # VM internal (no public IP — SSH via vm-lb sebagai jump host)
 create_vm vm-app1 "$SZ_APP" "10.0.0.11" '""'
@@ -107,9 +109,11 @@ echo "==> Provisioning selesai. Daftar VM:"
 az vm list-ip-addresses --resource-group "$RG" --output table
 
 echo
-echo "Public IP vm-lb & vm-fe di kolom PublicIPAddresses."
+echo "Public IP vm-lb di kolom PublicIPAddresses."
 echo "SSH ke vm-lb  : ssh $ADMIN@<PUBLIC_IP_vm-lb>"
-echo "SSH ke vm-fe  : ssh $ADMIN@<PUBLIC_IP_vm-fe>"
 echo "SSH ke vm-app1: ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.11"
 echo "SSH ke vm-app2: ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.12"
 echo "SSH ke vm-db  : ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.13"
+echo
+echo "CATATAN: vm-lb sekarang juga serve frontend (Opsi A — vm-fe digabung)."
+echo "Jalankan 30_lb_setup.sh (bukan 40_fe_setup.sh) untuk setup LB + FE sekaligus."
