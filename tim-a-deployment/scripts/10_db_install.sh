@@ -5,7 +5,7 @@
 # Phase 1 — Tim A. Idempotent sebisa mungkin; aman dijalankan ulang.
 set -euo pipefail
 
-INTERNAL_IP="10.0.0.13"
+INTERNAL_IP="10.0.0.6"   # app1-dan-db (MongoDB + Flask gabung 1 VM)
 SUBNET="10.0.0.0/24"
 CONF_SRC="$(dirname "$0")/../configs/mongod.conf"
 

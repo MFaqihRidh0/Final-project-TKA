@@ -5,8 +5,8 @@
 # JWT_SECRET yang SAMA:  sudo JWT_SECRET="<nilai-dari-vm-app>" ./20_app_setup.sh
 set -euo pipefail
 
-DB_IP="10.0.0.13"
-LB_IP="10.0.0.10"
+DB_IP="10.0.0.6"    # app1-dan-db (MongoDB di VM yang sama / VM tetangga)
+LB_IP="10.0.0.5"   # lb-dan-fe
 APP_DIR="/opt/orderapp"
 ENV_DIR="/etc/orderapp"
 HERE="$(cd "$(dirname "$0")" && pwd)"
