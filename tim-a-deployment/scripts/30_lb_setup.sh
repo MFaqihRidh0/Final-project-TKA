@@ -49,7 +49,7 @@ curl -s -o /dev/null -w "GET /health   → HTTP %{http_code}\n" http://localhost
 curl -s -o /dev/null -w "GET /api/health → HTTP %{http_code}\n" http://localhost/api/health
 echo
 echo "==> DoD:"
-echo "    - http://<public-ip-lb>        → halaman toko muncul"
-echo "    - http://<public-ip-lb>/health → {status:ok}"
+echo "    - http://<public-ip-lb>          → halaman toko muncul"
+echo "    - http://<public-ip-lb>/health   → {status:ok}"
 echo "    - Login di frontend → muat produk → buat order (via /api/)"
-echo "    - Matikan vm-app1, request masih terlayani vm-app2"
+echo "    (Skema 3-VM: 1 app server — upgrade ke 4-VM untuk HA round-robin)"

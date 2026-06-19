@@ -43,7 +43,7 @@ az network nsg rule create --resource-group "$RG" --nsg-name "$NSG" \
   --protocol Tcp --direction Inbound --access Allow \
   --source-address-prefixes "*" --destination-port-ranges 22
 
-# 3b. HTTP publik (hanya vm-lb & vm-fe yang punya public IP)
+# 3b. HTTP publik (hanya vm-lb yang punya public IP)
 az network nsg rule create --resource-group "$RG" --nsg-name "$NSG" \
   --name Allow-HTTP --priority 110 \
   --protocol Tcp --direction Inbound --access Allow \
@@ -88,16 +88,17 @@ create_vm() {
     --no-wait
 }
 
-# Opsi A: vm-lb juga serve frontend (vm-fe dihapus, hemat 1 vCPU)
-# Total vCPU: vm-lb(1) + vm-app1(1) + vm-app2(1) + vm-db(2) = 5 vCPU
+# Skema 3-VM (6 vCPU total): vm-lb+fe / vm-app / vm-db
+# Total vCPU: vm-lb(2) + vm-app(2) + vm-db(2) = 6 vCPU
+# Untuk upgrade ke 4-VM: uncomment create_vm vm-app2 di bawah dan update nginx-lb-fe.conf
 
 # VM dengan public IP
-create_vm vm-lb   "$SZ_SMALL" "10.0.0.10" "vm-lb-ip"
+create_vm vm-lb  "$SZ_ALL" "10.0.0.10" "vm-lb-ip"
 
 # VM internal (no public IP — SSH via vm-lb sebagai jump host)
-create_vm vm-app1 "$SZ_APP" "10.0.0.11" '""'
-create_vm vm-app2 "$SZ_APP" "10.0.0.12" '""'
-create_vm vm-db   "$SZ_DB"  "10.0.0.13" '""'
+create_vm vm-app "$SZ_ALL" "10.0.0.11" '""'
+create_vm vm-db  "$SZ_ALL" "10.0.0.13" '""'
+# create_vm vm-app2 "$SZ_ALL" "10.0.0.12" '""'   # aktifkan jika quota 8 vCPU
 
 echo "==> Menunggu semua VM selesai dibuat..."
 az vm wait --resource-group "$RG" \
@@ -110,10 +111,9 @@ az vm list-ip-addresses --resource-group "$RG" --output table
 
 echo
 echo "Public IP vm-lb di kolom PublicIPAddresses."
-echo "SSH ke vm-lb  : ssh $ADMIN@<PUBLIC_IP_vm-lb>"
-echo "SSH ke vm-app1: ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.11"
-echo "SSH ke vm-app2: ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.12"
-echo "SSH ke vm-db  : ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.13"
+echo "SSH ke vm-lb : ssh $ADMIN@<PUBLIC_IP_vm-lb>"
+echo "SSH ke vm-app: ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.11"
+echo "SSH ke vm-db : ssh -J $ADMIN@<PUBLIC_IP_vm-lb> $ADMIN@10.0.0.13"
 echo
-echo "CATATAN: vm-lb sekarang juga serve frontend (Opsi A — vm-fe digabung)."
-echo "Jalankan 30_lb_setup.sh (bukan 40_fe_setup.sh) untuk setup LB + FE sekaligus."
+echo "CATATAN: vm-lb juga serve frontend (LB + FE gabung 1 VM, 6 vCPU total)."
+echo "Jalankan 30_lb_setup.sh untuk setup Nginx LB + Frontend sekaligus."

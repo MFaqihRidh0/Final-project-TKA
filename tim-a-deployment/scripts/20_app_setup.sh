@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# 20_app_setup.sh — Setup Flask + Gunicorn di vm-app1 / vm-app2 (jalankan IDENTIK di keduanya)
+# 20_app_setup.sh — Setup Flask + Gunicorn di vm-app (10.0.0.11)
 # Target: Ubuntu 22.04. Jalankan via sudo. FP TKA 2026 — Tim A (Phase 2).
-#
-# JWT_SECRET: harus SAMA di kedua VM. Cara pakai:
-#   1) Di vm-app1:  sudo JWT_SECRET="$(openssl rand -hex 32)" ./20_app_setup.sh
-#      → script print nilai JWT_SECRET. CATAT.
-#   2) Di vm-app2:  sudo JWT_SECRET="<nilai-sama-dari-app1>" ./20_app_setup.sh
+# Skema 3-VM: hanya 1 app server. Jika upgrade ke 4-VM, jalankan ulang di vm-app2 dengan
+# JWT_SECRET yang SAMA:  sudo JWT_SECRET="<nilai-dari-vm-app>" ./20_app_setup.sh
 set -euo pipefail
 
 DB_IP="10.0.0.13"

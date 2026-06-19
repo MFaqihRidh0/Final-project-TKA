@@ -7,8 +7,7 @@
 - **Akses SSH** semua VM (monitoring `htop`/`vmstat` saat test):
   ```bash
   LB_IP="<PUBLIC_IP_vm-lb>"
-  ssh -J azureuser@$LB_IP azureuser@10.0.0.11   # vm-app1
-  ssh -J azureuser@$LB_IP azureuser@10.0.0.12   # vm-app2
+  ssh -J azureuser@$LB_IP azureuser@10.0.0.11   # vm-app
   ssh -J azureuser@$LB_IP azureuser@10.0.0.13   # vm-db
   ```
 - **Worker Gunicorn saat ini = 4.** Untuk ubah saat tuning:

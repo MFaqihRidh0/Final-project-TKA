@@ -4,23 +4,21 @@ Folder kerja Tim A untuk FP Teknologi Komputasi Awan 2026 — Order Processing S
 Semua config, script, dan log deployment dikumpulkan di sini, lalu di-commit ke
 repo kelompok (`fp-tka-26-main/configs/`) saat handoff ke Tim C.
 
-## Arsitektur Target
+## Arsitektur Target (Skema 3-VM, 6 vCPU)
 
-| Hostname | Role                 | Internal IP | Spec        | Harga |
-|----------|----------------------|-------------|-------------|-------|
 | Hostname | Role | Internal IP | Spec | vCPU | Harga |
 | --- | --- | --- | --- | --- | --- |
-| vm-lb | Nginx LB + Frontend | 10.0.0.10 | Standard_B1s (1vCPU/1GB) | 1 | ~$8 |
-| vm-app1 | Flask + Gunicorn | 10.0.0.11 | Standard_B1ms (1vCPU/2GB) | 1 | ~$15 |
-| vm-app2 | Flask + Gunicorn | 10.0.0.12 | Standard_B1ms (1vCPU/2GB) | 1 | ~$15 |
-| vm-db | MongoDB | 10.0.0.13 | Standard_B2s (2vCPU/4GB) | 2 | ~$30 |
-| | | | **TOTAL** | **5 vCPU** | **~$68** |
+| vm-lb | Nginx LB + Frontend | 10.0.0.10 | Standard_B2s (2vCPU/4GB) | 2 | ~$30 |
+| vm-app | Flask + Gunicorn | 10.0.0.11 | Standard_B2s (2vCPU/4GB) | 2 | ~$30 |
+| vm-db | MongoDB 7.0 | 10.0.0.13 | Standard_B2s (2vCPU/4GB) | 2 | ~$30 |
 
-> **Opsi A:** vm-fe digabung ke vm-lb (hemat 1 VM + ~$8). vm-lb melayani
-> static frontend sekaligus load balance ke app servers via `/api/`.
+Total: 6 vCPU, ~$90/bulan.
+
+> Skema minimum viable dengan quota **6 vCPU**. Untuk upgrade ke 4-VM (HA round-robin),
+> tambah vm-app2 (10.0.0.12) dan aktifkan baris di `nginx-lb-fe.conf` + `01_provision_azure.sh`.
 
 Azure region `southeastasia` (Singapore). VNet `10.0.0.0/24`. Public IP hanya pada
-vm-lb. VM internal (app1, app2, db) diakses via SSH jump host vm-lb.
+vm-lb. VM internal (vm-app, vm-db) diakses via SSH jump host vm-lb.
 
 ## Struktur Folder
 

@@ -1,4 +1,4 @@
-# Phase 0 — Provision Azure (5 VM + VNet + NSG)
+# Phase 0 — Provision Azure (3 VM + VNet + NSG)
 
 VM belum ada → buat dulu sebelum Phase 1. Eksekusi manual oleh Anda.
 
@@ -22,61 +22,62 @@ chmod +x tim-a-deployment/scripts/01_provision_azure.sh
 ```
 
 Script membuat: Resource Group `fp-tka-rg`, VNet `tka-vnet` + subnet `10.0.0.0/24`,
-NSG dengan 5 rule keamanan, dan 5 VM dengan IP privat statik 10.0.0.10–14.
+NSG dengan 5 rule keamanan, dan **3 VM** (skema 6 vCPU, semua Standard_B2s):
+
+| VM     | IP         | Public IP | Role                |
+| ------ | ---------- | --------- | ------------------- |
+| vm-lb  | 10.0.0.10  | Ya        | Nginx LB + Frontend |
+| vm-app | 10.0.0.11  | Tidak     | Flask + Gunicorn    |
+| vm-db  | 10.0.0.13  | Tidak     | MongoDB 7.0         |
 
 ## Topologi Jaringan
 
-```
+```text
 Internet
   │
-  ├─ vm-lb  (10.0.0.10) — public IP ✅ port 80 terbuka
-  └─ vm-fe  (10.0.0.14) — public IP ✅ port 80 terbuka
-
-  vm-app1 (10.0.0.11) — NO public IP (internal only)
-  vm-app2 (10.0.0.12) — NO public IP (internal only)
-  vm-db   (10.0.0.13) — NO public IP (internal only)
+  └─ vm-lb  (10.0.0.10) — public IP, port 80 terbuka
+       │  serve static frontend + proxy /api/ → vm-app:5000
+       │
+  vm-app (10.0.0.11) — internal only (Flask/Gunicorn)
+  vm-db  (10.0.0.13) — internal only (MongoDB)
 ```
 
-NSG memblok port 5000 & 27017 dari internet — hanya bisa diakses antar VM dalam VNet.
+NSG memblok port 5000 & 27017 dari internet — hanya bisa diakses dalam VNet.
 
 ## SSH ke VM
 
-**vm-lb & vm-fe** (punya public IP):
+**vm-lb** (punya public IP — SSH langsung):
+
 ```bash
 ssh azureuser@<PUBLIC_IP_vm-lb>
-ssh azureuser@<PUBLIC_IP_vm-fe>
 ```
 
-**vm-app1, vm-app2, vm-db** (internal, lewat jump host vm-lb):
+**vm-app & vm-db** (internal, lewat jump host vm-lb):
+
 ```bash
-ssh -J azureuser@<PUBLIC_IP_vm-lb> azureuser@10.0.0.11   # vm-app1
-ssh -J azureuser@<PUBLIC_IP_vm-lb> azureuser@10.0.0.12   # vm-app2
+ssh -J azureuser@<PUBLIC_IP_vm-lb> azureuser@10.0.0.11   # vm-app
 ssh -J azureuser@<PUBLIC_IP_vm-lb> azureuser@10.0.0.13   # vm-db
 ```
 
-> **Tip Windows:** Kalau pakai PowerShell dan `-J` tidak dikenali, pakai PuTTY
-> dengan proxy tunnel, atau install OpenSSH via Settings → Apps → Optional Features.
+> **Tip Windows:** Kalau pakai PowerShell dan `-J` tidak dikenali, install OpenSSH
+> via Settings → Apps → Optional Features, atau gunakan Azure Cloud Shell.
 
 ## Transfer File ke VM
 
 ```bash
-# Kirim folder deployment ke semua VM
-scp -r tim-a-deployment/ azureuser@<PUBLIC_IP_vm-lb>:~
-scp -r tim-a-deployment/ azureuser@<PUBLIC_IP_vm-fe>:~
+LB_IP="<PUBLIC_IP_vm-lb>"
 
-# VM internal (lewat jump host)
-scp -r -J azureuser@<PUBLIC_IP_vm-lb> tim-a-deployment/ azureuser@10.0.0.11:~
-scp -r -J azureuser@<PUBLIC_IP_vm-lb> tim-a-deployment/ azureuser@10.0.0.12:~
-scp -r -J azureuser@<PUBLIC_IP_vm-lb> tim-a-deployment/ azureuser@10.0.0.13:~
+# vm-lb (public IP langsung)
+scp -r tim-a-deployment/ azureuser@$LB_IP:~
 
-# Source code app ke vm-app1 & vm-app2
-scp -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/BE/app.py azureuser@10.0.0.11:~/app-src/
-scp -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/BE/requirements.txt azureuser@10.0.0.11:~/app-src/
-scp -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/BE/app.py azureuser@10.0.0.12:~/app-src/
-scp -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/BE/requirements.txt azureuser@10.0.0.12:~/app-src/
+# vm-app (lewat jump host)
+scp -r -J azureuser@$LB_IP tim-a-deployment/ azureuser@10.0.0.11:~
+scp -J azureuser@$LB_IP fp-tka-26-main/Resources/BE/app.py azureuser@10.0.0.11:~/app-src/
+scp -J azureuser@$LB_IP fp-tka-26-main/Resources/BE/requirements.txt azureuser@10.0.0.11:~/app-src/
 
-# DB dump ke vm-db
-scp -r -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/DB/dump azureuser@10.0.0.13:~/db-dump
+# vm-db (lewat jump host)
+scp -r -J azureuser@$LB_IP tim-a-deployment/ azureuser@10.0.0.13:~
+scp -r -J azureuser@$LB_IP fp-tka-26-main/Resources/DB/dump azureuser@10.0.0.13:~/db-dump
 ```
 
 ## Setelah Selesai
@@ -85,7 +86,7 @@ scp -r -J azureuser@<PUBLIC_IP_vm-lb> fp-tka-26-main/Resources/DB/dump azureuser
 az vm list-ip-addresses --resource-group fp-tka-rg --output table
 ```
 
-Catat EXTERNAL IP vm-lb (untuk Tim B) dan vm-fe (untuk akses browser).
+Catat EXTERNAL IP vm-lb — ini yang dibagikan ke Tim B (untuk load test) dan dibuka di browser.
 Lanjut ke **Phase 1** (`docs/PHASE1_MONGODB.md`).
 
 ## Teardown (setelah FP selesai — wajib agar credit tidak habis)
