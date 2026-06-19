@@ -63,13 +63,13 @@ boleh di-flush antar skenario.
 
 ## Progress
 
-- [~] Phase 0 — Provision GCP (5 VM, VPC, firewall, Cloud NAT) — script siap, eksekusi pending
+- [~] Phase 0 — Provision Azure (4 VM, VNet, NSG) — `01_provision_azure.sh` siap
 - [~] Phase 1 — MongoDB setup (vm-db) — artifacts dibuat, eksekusi pending
 - [~] Phase 2 — App server (vm-app1, vm-app2) — artifacts dibuat, eksekusi pending
-- [~] Phase 3 — Nginx Load Balancer (vm-lb) — artifacts dibuat, eksekusi pending
-- [~] Phase 4 — Frontend (vm-fe) — storefront e-commerce + adaptasi backend asli, eksekusi pending
+- [~] Phase 3 — Nginx LB + Frontend (vm-lb, Opsi A) — artifacts dibuat, eksekusi pending
+- [~] Phase 4 — (digabung ke Phase 3 via Opsi A — vm-fe tidak terpisah)
 - [~] Phase 5 — E2E verification — verify_endpoints.sh siap (JWT-aware)
 - [~] Phase 6 — Handoff Tim B & Tim C — flush_orders.sh + doc handoff siap
 
 > Semua artefak Phase 0–6 **selesai dibuat**. Status `[~]` = tinggal dieksekusi di VM
-> setelah GCP di-provision. Tidak ada yang diblok dari sisi pembuatan config/script.
+> setelah Azure di-provision. Tidak ada yang diblok dari sisi pembuatan config/script.

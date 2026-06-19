@@ -26,15 +26,22 @@ Frontend bawaan dosen (`Resources/FE/`) dibuat untuk API versi sederhana
 Nginx FE proxy ke vm-lb (same-origin). Tidak perlu header CORS di backend.
 
 ## Langkah
+
+> **Opsi A aktif:** vm-fe sudah digabung ke vm-lb. Phase 4 dijalankan
+> **bersamaan dengan Phase 3** via `30_lb_setup.sh` — tidak perlu VM terpisah.
+> Script `40_fe_setup.sh` tidak dipakai di konfigurasi Azure saat ini.
+
+Kalau tetap ingin VM fe terpisah (butuh 5 vCPU):
 ```bash
-gcloud compute scp --recurse tim-a-deployment vm-fe:~ --zone=asia-southeast2-a
-# vm-fe (punya public IP, SSH biasa juga bisa):
+LB_IP="<PUBLIC_IP_vm-lb>"
+scp -r tim-a-deployment/ azureuser@$LB_IP:~/
+ssh azureuser@$LB_IP
 chmod +x ~/tim-a-deployment/scripts/40_fe_setup.sh
 sudo ~/tim-a-deployment/scripts/40_fe_setup.sh
 ```
 
 ## Verifikasi (Definition of Done)
-- Buka `http://<public-ip-fe>` di browser → halaman tampil dengan styling.
+- Buka `http://<public-ip-lb>` di browser → halaman tampil dengan styling.
 - Login `admin1@tka.its.ac.id / Admin@12345` → badge user muncul di nav.
 - "Muat Produk" → grid produk dari seed tampil.
 - Tambah item → "Buat Pesanan" → order_id balik (cek di Network tab → request ke `/api/orders` 201).

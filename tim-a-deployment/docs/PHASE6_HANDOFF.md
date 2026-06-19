@@ -6,8 +6,10 @@
 - **Public IP/domain vm-lb** → target Locust: `locust -f locustfile.py --host=http://<public-ip-lb>`
 - **Akses SSH** semua VM (monitoring `htop`/`vmstat` saat test):
   ```bash
-  gcloud compute ssh vm-app1 --zone=asia-southeast2-a --tunnel-through-iap
-  gcloud compute ssh vm-db   --zone=asia-southeast2-a --tunnel-through-iap
+  LB_IP="<PUBLIC_IP_vm-lb>"
+  ssh -J azureuser@$LB_IP azureuser@10.0.0.11   # vm-app1
+  ssh -J azureuser@$LB_IP azureuser@10.0.0.12   # vm-app2
+  ssh -J azureuser@$LB_IP azureuser@10.0.0.13   # vm-db
   ```
 - **Worker Gunicorn saat ini = 4.** Untuk ubah saat tuning:
   ```bash
@@ -77,7 +79,8 @@ Lihat checklist "Bukti untuk Tim C" di tiap `docs/PHASEx_*.md`.
   test butuh index di `user_id`, `status`, `products`, `users.email`.
 
 ## Checklist final sebelum "Tim A selesai"
-- [ ] 5 VM hidup & accessible (SSH/IAP)
+
+- [ ] 4 VM hidup & accessible via SSH (vm-lb langsung, vm-app1/app2/db via jump host)
 - [ ] MongoDB running, index lengkap, seed ter-restore (10.000 orders)
 - [ ] vm-app1 & vm-app2 jalan via systemd, JWT_SECRET identik
 - [ ] Nginx LB round-robin terverifikasi (HA: matikan 1 app, tetap jalan)

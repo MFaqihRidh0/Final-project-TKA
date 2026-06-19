@@ -42,7 +42,7 @@ if command -v ufw >/dev/null 2>&1; then
   sudo ufw deny 27017
   echo "    (ufw rule ditambahkan. 'sudo ufw enable' jika belum aktif.)"
 else
-  echo "    ufw tidak ada — andalkan GCP VPC firewall (lihat 01_provision_gcp.sh)."
+  echo "    ufw tidak ada — andalkan Azure NSG firewall (sudah dikonfigurasi saat provision)."
 fi
 
 echo "==> [6/7] Buat index (orders/products/users)"

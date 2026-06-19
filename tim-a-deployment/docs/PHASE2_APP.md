@@ -6,12 +6,14 @@ Flask + Gunicorn, **identik** di kedua VM. Depend ke MongoDB (Phase 1) yang suda
 
 ### 1. Copy artefak + source ke VM
 ```bash
-# Dari laptop:
-gcloud compute scp --recurse tim-a-deployment vm-app1:~ --zone=asia-southeast2-a --tunnel-through-iap
-gcloud compute scp fp-tka-26-main/Resources/BE/app.py \
-                   fp-tka-26-main/Resources/BE/requirements.txt \
-                   vm-app1:~/app-src/ --zone=asia-southeast2-a --tunnel-through-iap
-# (buat ~/app-src dulu via: gcloud compute ssh vm-app1 ... --command 'mkdir -p ~/app-src')
+# Dari laptop — lewat jump host vm-lb (vm-app1 tidak punya public IP):
+LB_IP="<PUBLIC_IP_vm-lb>"
+
+scp -r -J azureuser@$LB_IP tim-a-deployment/ azureuser@10.0.0.11:~/
+scp -J azureuser@$LB_IP fp-tka-26-main/Resources/BE/app.py azureuser@10.0.0.11:~/app-src/
+scp -J azureuser@$LB_IP fp-tka-26-main/Resources/BE/requirements.txt azureuser@10.0.0.11:~/app-src/
+
+# (ulang untuk vm-app2, ganti 10.0.0.11 → 10.0.0.12)
 ```
 
 ### 2. Jalankan setup

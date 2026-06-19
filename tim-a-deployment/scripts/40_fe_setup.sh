@@ -33,8 +33,8 @@ sudo systemctl status nginx --no-pager || true
 
 echo "==> [6/6] Firewall (ufw): 80 publik, SSH dijaga"
 if command -v ufw >/dev/null 2>&1; then
-  sudo ufw allow from 35.235.240.0/20 to any port 22 proto tcp
   sudo ufw allow 22/tcp
+  # Azure NSG sudah membatasi SSH dari internet — tidak perlu IAP CIDR (GCP-only)
   sudo ufw allow 80/tcp
 fi
 

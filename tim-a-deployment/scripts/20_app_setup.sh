@@ -71,8 +71,8 @@ sudo systemctl status orderapp --no-pager || true
 
 echo "==> [8/8] Firewall: port 5000 HANYA dari vm-lb (${LB_IP})"
 if command -v ufw >/dev/null 2>&1; then
-  sudo ufw allow from 35.235.240.0/20 to any port 22 proto tcp   # jaga IAP SSH
   sudo ufw allow from 10.0.0.0/24      to any port 22 proto tcp
+  # Azure NSG sudah membatasi SSH dari internet — tidak perlu IAP CIDR (GCP-only)
   sudo ufw allow from "${LB_IP}"       to any port 5000 proto tcp
   sudo ufw deny 5000
   echo "    (ufw rule siap. 'sudo ufw enable' kalau mau aktifkan — SSH sudah dijaga.)"

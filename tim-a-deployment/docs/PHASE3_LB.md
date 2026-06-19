@@ -4,10 +4,12 @@ Reverse proxy round-robin ke vm-app1 & vm-app2. Komponen paling berdampak ke sko
 
 ## Langkah
 ```bash
-# Copy artefak ke vm-lb (vm-lb punya public IP → SSH biasa juga bisa)
-gcloud compute scp --recurse tim-a-deployment vm-lb:~ --zone=asia-southeast2-a
+# vm-lb punya public IP → scp langsung
+LB_IP="<PUBLIC_IP_vm-lb>"
+scp -r tim-a-deployment/ azureuser@$LB_IP:~/
 
-# Di vm-lb:
+# SSH lalu jalankan:
+ssh azureuser@$LB_IP
 chmod +x ~/tim-a-deployment/scripts/30_lb_setup.sh
 sudo ~/tim-a-deployment/scripts/30_lb_setup.sh
 ```
