@@ -1,0 +1,28 @@
+[Unit]
+# orderapp.service — Gunicorn untuk Order Processing Service (vm-app1 & vm-app2)
+# FP TKA 2026 — Tim A (Phase 2)
+Description=Order Processing Service (Flask + Gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=orderapp
+Group=orderapp
+WorkingDirectory=/opt/orderapp
+EnvironmentFile=/etc/orderapp/orderapp.env
+ExecStart=/opt/orderapp/venv/bin/gunicorn -c /opt/orderapp/gunicorn.conf.py app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=3
+
+# "Too many open files" saat load testing → naikkan limit (briefing troubleshooting).
+LimitNOFILE=65535
+
+# Logging ke journald (briefing aturan kerja).
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=orderapp
+
+[Install]
+WantedBy=multi-user.target
