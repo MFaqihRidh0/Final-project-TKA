@@ -1,0 +1,100 @@
+version: "3.9"
+
+services:
+
+  # ── MongoDB (simulasi vm-db) ────────────────────────────
+  mongo:
+    image: mongo:7.0
+    container_name: tka-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./fp-tka-26-main/Resources/DB/dump:/dump:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Restore seed data (jalan sekali lalu exit) ──────────
+  mongo-init:
+    image: mongo:7.0
+    container_name: tka-mongo-init
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./fp-tka-26-main/Resources/DB/dump:/dump:ro
+    command: >
+      mongorestore --uri="mongodb://mongo:27017" --drop /dump/
+    restart: "no"
+
+  # ── Flask App 1 (simulasi vm-app1) ─────────────────────
+  app1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    container_name: tka-app1
+    environment:
+      MONGO_URI: mongodb://mongo:27017/
+      JWT_SECRET: local-dev-secret-sama-di-app1-dan-app2
+      JWT_EXPIRES: "86400"
+      GUNICORN_WORKERS: "2"
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Flask App 2 (simulasi vm-app2) ─────────────────────
+  app2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    container_name: tka-app2
+    environment:
+      MONGO_URI: mongodb://mongo:27017/
+      JWT_SECRET: local-dev-secret-sama-di-app1-dan-app2
+      JWT_EXPIRES: "86400"
+      GUNICORN_WORKERS: "2"
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Nginx Load Balancer (simulasi vm-lb) ───────────────
+  nginx-lb:
+    image: nginx:alpine
+    container_name: tka-lb
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx-lb-local.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app1:
+        condition: service_healthy
+      app2:
+        condition: service_healthy
+
+  # ── Nginx Frontend (simulasi vm-fe) ────────────────────
+  nginx-fe:
+    image: nginx:alpine
+    container_name: tka-fe
+    ports:
+      - "3001:80"
+    volumes:
+      - ./tim-a-deployment/frontend:/var/www/orderfe:ro
+      - ./docker/nginx-fe-local.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - nginx-lb
+
+volumes:
+  mongo_data:
