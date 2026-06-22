@@ -1,0 +1,22 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/admin/users?page=1&limit=20&is_active=false,CatchResponseError(502),4,2026-06-22T13:16:14Z,2026-06-22T13:16:18Z
+GET,/api/admin/users?page=2&limit=20&is_active=true,CatchResponseError(502),2,2026-06-22T13:16:06Z,2026-06-22T13:16:16Z
+GET,/orders [admin list],CatchResponseError(502),143,2026-06-22T13:15:53Z,2026-06-22T13:16:19Z
+GET,/api/admin/logs?limit=30,CatchResponseError(502),142,2026-06-22T13:15:50Z,2026-06-22T13:16:19Z
+GET,/api/admin/users?page=5&limit=20&is_active=true,CatchResponseError(502),2,2026-06-22T13:16:09Z,2026-06-22T13:16:12Z
+GET,/api/admin/users?page=5&limit=20,CatchResponseError(502),8,2026-06-22T13:15:56Z,2026-06-22T13:16:18Z
+GET,/orders [user list],CatchResponseError(502),495,2026-06-22T13:15:54Z,2026-06-22T13:16:19Z
+GET,/api/admin/users?page=1&limit=20&is_active=true,CatchResponseError(502),1,2026-06-22T13:16:03Z,2026-06-22T13:16:03Z
+GET,/api/admin/users?page=3&limit=20&is_active=true,CatchResponseError(502),3,2026-06-22T13:15:58Z,2026-06-22T13:16:09Z
+GET,/api/admin/users?page=2&limit=20,CatchResponseError(502),11,2026-06-22T13:15:56Z,2026-06-22T13:16:18Z
+GET,/api/admin/users?page=5&limit=20&is_active=false,CatchResponseError(502),3,2026-06-22T13:16:06Z,2026-06-22T13:16:17Z
+GET,/api/admin/users?page=3&limit=20,CatchResponseError(502),13,2026-06-22T13:15:54Z,2026-06-22T13:16:19Z
+GET,/api/admin/users?page=3&limit=20&is_active=false,CatchResponseError(502),6,2026-06-22T13:15:59Z,2026-06-22T13:16:18Z
+GET,/api/admin/users?page=4&limit=20&is_active=true,CatchResponseError(502),4,2026-06-22T13:15:54Z,2026-06-22T13:16:03Z
+GET,/products?[filters],CatchResponseError(502),4593,2026-06-22T13:15:50Z,2026-06-22T13:16:19Z
+GET,/api/admin/users?page=4&limit=20,CatchResponseError(502),11,2026-06-22T13:15:54Z,2026-06-22T13:16:16Z
+GET,/api/admin/stats,CatchResponseError(502),601,2026-06-22T13:15:51Z,2026-06-22T13:16:19Z
+GET,/api/admin/users?page=1&limit=20,CatchResponseError(502),14,2026-06-22T13:15:54Z,2026-06-22T13:16:17Z
+GET,/products [init],HTTPError('502 Server Error: Bad Gateway for url: /products [init]'),800,2026-06-22T13:15:50Z,2026-06-22T13:16:17Z
+GET,/api/admin/users?page=4&limit=20&is_active=false,CatchResponseError(502),3,2026-06-22T13:16:05Z,2026-06-22T13:16:17Z
+GET,/api/admin/users?page=2&limit=20&is_active=false,CatchResponseError(502),3,2026-06-22T13:16:04Z,2026-06-22T13:16:13Z

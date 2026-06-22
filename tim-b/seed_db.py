@@ -54,7 +54,7 @@ PAYMENTS = ["gopay","ovo","dana","transfer_bank","kartu_kredit","qris"]
 STATUSES = ["pending","processing","completed","cancelled"]
 
 # ─── 1. Users ─────────────────────────────────────────────────────────────────
-print("[1] Seed users …")
+print("[1] Seed users ...")
 
 def upsert_user(doc: dict):
     users_col.update_one({"email": doc["email"]}, {"$setOnInsert": doc}, upsert=True)
@@ -98,10 +98,13 @@ for i in range(1, 6):
 print("   5 admin selesai")
 
 # Index email
-users_col.create_index("email", unique=True, background=True)
+try:
+    users_col.create_index("email", unique=True, background=True)
+except Exception as e:
+    print(f"   [!] Info index email: {e}")
 
 # ─── 2. Produk ────────────────────────────────────────────────────────────────
-print("[2] Seed produk …")
+print("[2] Seed produk ...")
 
 PRODUCTS_TEMPLATE = [
     # (nama, kategori, harga, deskripsi)
@@ -183,15 +186,18 @@ for idx, (name, cat, price, desc) in enumerate(PRODUCTS_TEMPLATE, 1):
             if existing:
                 inserted_products.append(existing)
 
-prods_col.create_index("category", background=True)
-prods_col.create_index("is_active", background=True)
-prods_col.create_index([("created_at", DESCENDING)], background=True)
+try:
+    prods_col.create_index("category", background=True)
+    prods_col.create_index("is_active", background=True)
+    prods_col.create_index([("created_at", DESCENDING)], background=True)
+except Exception as e:
+    print(f"   [!] Info index produk: {e}")
 
 print(f"   {prods_col.count_documents({'is_active': True})} produk aktif di database")
 
 # ─── 3. Seed orders (masa lalu) ───────────────────────────────────────────────
 if args.orders > 0:
-    print(f"[3] Seed {args.orders:,} orders (ini butuh beberapa menit) …")
+    print(f"[3] Seed {args.orders:,} orders (ini butuh beberapa menit) ...")
 
     all_users  = list(users_col.find({"role": "user"}, {"_id": 1, "name": 1, "email": 1, "city": 1, "address": 1}))
     all_prods  = list(prods_col.find({"is_active": True}, {"_id": 1, "name": 1, "category": 1, "price": 1}))
@@ -252,24 +258,27 @@ if args.orders > 0:
         print(f"   {total_inserted:,}/{args.orders:,} ({pct:.0f}%)", end="\r")
 
     # Index penting untuk performa query
-    orders_col.create_index([("created_at", DESCENDING)], background=True)
-    orders_col.create_index("order_id",  background=True)
-    orders_col.create_index("user_id",   background=True)
-    orders_col.create_index("status",    background=True)
+    try:
+        orders_col.create_index([("created_at", DESCENDING)], background=True)
+        orders_col.create_index("order_id",  background=True)
+        orders_col.create_index("user_id",   background=True)
+        orders_col.create_index("status",    background=True)
+    except Exception as e:
+        print(f"   [!] Info index order: {e}")
 
     print(f"\n   {orders_col.count_documents({}):,} total orders di database")
 else:
     print("[3] Skip seed orders (--orders 0)")
 
-# ─── Ringkasan ────────────────────────────────────────────────────────────────
+# --- Ringkasan ----------------------------------------------------------------
 print()
 print("=" * 50)
-print("✅ Seed selesai!")
+print("[+] Seed selesai!")
 print(f"   Users  : {users_col.count_documents({})} ({users_col.count_documents({'role':'user'})} user, {users_col.count_documents({'role':'admin'})} admin)")
 print(f"   Produk : {prods_col.count_documents({'is_active': True})} aktif")
 print(f"   Orders : {orders_col.count_documents({}):,}")
 print()
 print("Login test:")
-print("   User  → user1@example.com   / User@12345")
-print("   Admin → admin1@tka.its.ac.id / Admin@12345")
+print("   User  -> user1@example.com   / User@12345")
+print("   Admin -> admin1@tka.its.ac.id / Admin@12345")
 print("=" * 50)

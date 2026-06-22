@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/admin/logs?limit=30,CatchResponseError(502),27,2026-06-22T12:36:13Z,2026-06-22T12:36:17Z
+GET,/products?[filters],CatchResponseError(502),878,2026-06-22T12:36:13Z,2026-06-22T12:36:17Z
+GET,/api/admin/stats,CatchResponseError(502),110,2026-06-22T12:36:13Z,2026-06-22T12:36:17Z
