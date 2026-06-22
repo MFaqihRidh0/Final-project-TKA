@@ -81,3 +81,4 @@ boleh di-flush antar skenario.
 
 > Semua artefak Phase 0–6 **selesai dibuat**. Status `[~]` = tinggal dieksekusi di VM
 > setelah Azure di-provision. Tidak ada yang diblok dari sisi pembuatan config/script.
+.

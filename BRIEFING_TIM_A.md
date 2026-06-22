@@ -367,3 +367,27 @@ Sebelum bilang "Tim A selesai", pastikan semua poin ini ✅:
 ---
 
 **Akhir briefing.** Claude Code, sekarang silakan mulai dengan menanyakan ke user: "Saya sudah baca briefing. Apakah VM sudah di-provision di GCP, atau saya perlu bantu generate command `gcloud compute instances create` dulu untuk kelima VM tersebut?"
+
+### Tim A Tim B
+
+Tim A — Cloud Infrastructure & Deployment 
+ Tanggung jawab:
+
+Provisioning VM di cloud provider (saran: GCP karena credit $300 paling besar dan budget $75/bulan jadi aman)
+Deploy backend Flask + Gunicorn (tuning jumlah worker)
+Setup MongoDB di VM terpisah + bikin index pada created_at dan order_id
+Konfigurasi Nginx sebagai reverse proxy / load balancer
+Deploy frontend (index.html + styles.css)
+Tuning OS-level (ulimit, sysctl) kalau perlu untuk handle high concurrency
+
+Tim B — Load Testing & Performance Engineering 
+Bobot 35% — bagian paling menentukan nilai akhir. Tanggung jawab:
+
+Setup Locust di host/laptop terpisah (penting, sesuai constraint soal)
+Bikin script cleanup MongoDB antar skenario (drop data yang di-insert tiap skenario, jangan drop seluruh collection)
+Eksekusi 5 skenario (Skenario 1 untuk max RPS, Skenario 2-5 untuk peak concurrency dengan spawn rate berbeda)
+Monitoring resource server selama pengujian (htop, vmstat, atau dashboard cloud) — screenshot CPU/memory wajib
+Koordinasi sama Tim A: kalau ada bottleneck, kasih feedback ke Tim A buat tuning ulang (siklus test → tune → test)
+Analisis hasil + grafik
+
+Idealnya, 1 orang fokus ke eksekusi Locust dan 1 orang fokus ke monitoring + dokumentasi hasil real-time. Anggota yang teliti dan paham scripting Python taruh di sini.
