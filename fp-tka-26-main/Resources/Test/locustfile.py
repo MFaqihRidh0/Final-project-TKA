@@ -13,6 +13,7 @@ ORDER_IDS      = []   # shared antar user
 CITIES    = ["Surabaya","Jakarta","Bandung","Medan","Semarang","Makassar"]
 PAYMENTS  = ["gopay","ovo","dana","transfer_bank","kartu_kredit","qris"]
 STATUSES  = ["pending","processing","completed","cancelled"]
+API       = "/api"   # prefix Nginx proxy
 
 
 # ════════════════════════════════════════════
@@ -26,7 +27,7 @@ class CustomerUser(HttpUser):
         """Login sebagai user biasa."""
         # Gunakan 1 dari 10 email acak agar hit cache session
         idx = random.randint(1, 50)
-        with self.client.post("/auth/login", json={
+        with self.client.post(f"{API}/auth/login", json={
             "email":    f"user{idx}@example.com",    # akan 404 tapi itu ok
             "password": "User@12345"
         }, catch_response=True, name="/auth/login [user]") as res:
@@ -41,7 +42,7 @@ class CustomerUser(HttpUser):
         # Ambil daftar produk sekali di awal
         global PRODUCTS_CACHE
         if not PRODUCTS_CACHE:
-            r = self.client.get("/products?limit=50", name="/products [init]")
+            r = self.client.get(f"{API}/products?limit=50", name="/products [init]")
             if r.status_code == 200:
                 PRODUCTS_CACHE = [p["_id"] for p in r.json().get("data", [])]
 
@@ -59,7 +60,7 @@ class CustomerUser(HttpUser):
             params["category"] = random.choice(cats)
         if random.random() < 0.2:
             params["sort"] = random.choice(["price_asc","price_desc","rating","newest"])
-        with self.client.get("/products", params=params, catch_response=True,
+        with self.client.get(f"{API}/products", params=params, catch_response=True,
                              name="/products?[filters]") as r:
             r.success() if r.status_code == 200 else r.failure(r.status_code)
 
@@ -69,7 +70,7 @@ class CustomerUser(HttpUser):
         if not PRODUCTS_CACHE:
             return
         pid = random.choice(PRODUCTS_CACHE)
-        with self.client.get(f"/products/{pid}", catch_response=True,
+        with self.client.get(f"{API}/products/{pid}", catch_response=True,
                              name="/products/<id>") as r:
             r.success() if r.status_code in (200, 404) else r.failure(r.status_code)
 
@@ -87,7 +88,7 @@ class CustomerUser(HttpUser):
             "shipping_cost":  random.choice([0, 9000, 15000, 25000]),
             "address":        f"Jl. Contoh No. {random.randint(1,100)}, {random.choice(CITIES)}",
         }
-        with self.client.post("/orders", json=payload, headers=self.auth_headers(),
+        with self.client.post(f"{API}/orders", json=payload, headers=self.auth_headers(),
                               catch_response=True, name="/orders [POST]") as r:
             if r.status_code == 201:
                 oid = r.json().get("order_id")
@@ -109,7 +110,7 @@ class CustomerUser(HttpUser):
         params = {"page": random.randint(1, 3), "limit": 10}
         if random.random() < 0.3:
             params["status"] = random.choice(STATUSES)
-        with self.client.get("/orders", params=params, headers=self.auth_headers(),
+        with self.client.get(f"{API}/orders", params=params, headers=self.auth_headers(),
                              catch_response=True, name="/orders [user list]") as r:
             r.success() if r.status_code in (200, 401) else r.failure(r.status_code)
 
@@ -119,7 +120,7 @@ class CustomerUser(HttpUser):
         if not ORDER_IDS or not self.token:
             return
         oid = random.choice(ORDER_IDS)
-        with self.client.get(f"/orders/{oid}", headers=self.auth_headers(),
+        with self.client.get(f"{API}/orders/{oid}", headers=self.auth_headers(),
                              catch_response=True, name="/orders/<id>") as r:
             r.success() if r.status_code in (200, 404, 401) else r.failure(r.status_code)
 
@@ -133,7 +134,7 @@ class AdminUser(HttpUser):
 
     def on_start(self):
         idx = random.randint(1, 5)
-        with self.client.post("/auth/login", json={
+        with self.client.post(f"{API}/auth/login", json={
             "email":    f"admin{idx}@tka.its.ac.id",
             "password": "Admin@12345"
         }, catch_response=True, name="/auth/login [admin]") as res:
@@ -152,7 +153,7 @@ class AdminUser(HttpUser):
     @task(4)
     def dashboard_stats(self):
         """GET /admin/stats — aggregasi dashboard (query paling berat)"""
-        with self.client.get("/admin/stats", headers=self.auth_headers(),
+        with self.client.get(f"{API}/admin/stats", headers=self.auth_headers(),
                              catch_response=True) as r:
             r.success() if r.status_code in (200, 401, 403) else r.failure(r.status_code)
 
@@ -164,7 +165,7 @@ class AdminUser(HttpUser):
         params = {"page": random.randint(1, 20), "limit": 20}
         if random.random() < 0.5:
             params["status"] = random.choice(STATUSES)
-        with self.client.get("/orders", params=params, headers=self.auth_headers(),
+        with self.client.get(f"{API}/orders", params=params, headers=self.auth_headers(),
                              catch_response=True, name="/orders [admin list]") as r:
             r.success() if r.status_code in (200, 401) else r.failure(r.status_code)
 
@@ -175,7 +176,7 @@ class AdminUser(HttpUser):
             return
         oid    = random.choice(ORDER_IDS)
         status = random.choice(["processing", "completed", "cancelled"])
-        with self.client.put(f"/orders/{oid}/status",
+        with self.client.put(f"{API}/orders/{oid}/status",
                              json={"status": status},
                              headers=self.auth_headers(),
                              catch_response=True,
@@ -190,13 +191,13 @@ class AdminUser(HttpUser):
         params = {"page": random.randint(1, 5), "limit": 20}
         if random.random() < 0.3:
             params["is_active"] = random.choice(["true", "false"])
-        with self.client.get("/admin/users", params=params, headers=self.auth_headers(),
+        with self.client.get(f"{API}/admin/users", params=params, headers=self.auth_headers(),
                              catch_response=True) as r:
             r.success() if r.status_code in (200, 401, 403) else r.failure(r.status_code)
 
     @task(1)
     def view_audit_logs(self):
         """GET /admin/logs — audit trail"""
-        with self.client.get("/admin/logs?limit=30", headers=self.auth_headers(),
+        with self.client.get(f"{API}/admin/logs?limit=30", headers=self.auth_headers(),
                              catch_response=True) as r:
             r.success() if r.status_code in (200, 401, 403) else r.failure(r.status_code)

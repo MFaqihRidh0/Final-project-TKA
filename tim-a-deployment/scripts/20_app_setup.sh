@@ -48,12 +48,14 @@ sudo "${APP_DIR}/venv/bin/pip" freeze | sudo tee "${APP_DIR}/requirements.lock.t
 
 echo "==> [6/8] Tulis ${ENV_DIR}/orderapp.env"
 sudo tee "${ENV_DIR}/orderapp.env" >/dev/null <<EOF
-MONGO_URI=mongodb://${DB_IP}:27017/
+MONGO_URI=mongodb://${DB_IP}:27017/?maxPoolSize=50
 JWT_SECRET=${JWT_SECRET}
 JWT_EXPIRES=86400
+# Workload I/O-bound (query MongoDB). gthread + banyak thread = throughput jauh lebih tinggi
+# daripada sync. 4 worker x 8 thread = 32 request konkuren per VM (64 total dgn 2 app server).
 GUNICORN_WORKERS=4
-GUNICORN_WORKER_CLASS=sync
-GUNICORN_THREADS=1
+GUNICORN_WORKER_CLASS=gthread
+GUNICORN_THREADS=8
 EOF
 sudo chmod 640 "${ENV_DIR}/orderapp.env"
 sudo chown -R orderapp:orderapp "$APP_DIR" "$ENV_DIR"
