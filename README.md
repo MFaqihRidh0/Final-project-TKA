@@ -752,9 +752,9 @@ Final-project-TKA/
 │       └── locustfile.py        <- Script Load Testing (Locust)
 ├── result/                      <- Hasil screenshot bukti implementasi dan load testing
 │   ├── azure_vms.jpeg           (Daftar Virtual Machines di Azure Portal)
+|   ├── arsitektur_Cloud.jpeg  (Arsitektur Cloud — Order Processing Service (Azure))
 │   ├── app1_gunicorn.png        (Gunicorn running di App Server 1)
 │   ├── app2_gunicorn.png        (Gunicorn running di App Server 2)
-|   ├── Arsitektur_Cloud.drawio  (Arsitektur Cloud — Order Processing Service (Azure))
 │   ├── ssh_lb.png               (Akses SSH ke Load Balancer VM)
 │   ├── ssh_app1.png             (Akses SSH ke App Server 1 VM)
 │   ├── ssh_app2.png             (Akses SSH ke App Server 2 VM)
