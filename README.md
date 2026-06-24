@@ -761,8 +761,7 @@ Final-project-TKA/
 │   ├── locust_users.jpeg        (Grafik Locust Number of Users)
 │   ├── locust_concurrency_*.jpeg (Grafik load test per skenario concurrency)
 │   └── cpu_usage_*.jpeg         (HTOP monitoring utilitas CPU app server)
-├── dummy/                       <- Folder arsip (Berisi file deploy lama, script tim, docker, & docs)
-└── fp-tka-26-main/              <- Folder acuan dari Dosen (Diabaikan)
+└── dummy/                       <- Folder arsip (Berisi file deploy lama, script tim, docker, & docs)
 ```
 
 ---
