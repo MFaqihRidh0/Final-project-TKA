@@ -70,18 +70,18 @@ Backend berupa REST API berbasis **Python (Flask)** dengan database **MongoDB**,
 
 | No | Hostname | Role | Public IP | Internal IP | Spec | OS | Harga/bulan |
 |---|---|---|---|---|---|---|---|
-| 1 | `lb-dan-fe` | Nginx LB + Nginx Frontend | **20.255.63.132** | 10.0.0.5 | Standard_B2ats (2vCPU/4GB) | Ubuntu 24.04 LTS | ~$30 |
-| 2 | `app1-dan-db` | Flask + Gunicorn + MongoDB | 20.205.18.6 | 10.0.0.6 | Standard_B2als (2vCPU/4GB) | Ubuntu 24.04 LTS | ~$30 |
-| 3 | `app2` | Flask + Gunicorn | 20.2.80.145 | 10.0.0.9 | Standard_B2ats (2vCPU/4GB) | Ubuntu 24.04 LTS | ~$30 |
-| | | | | | | **TOTAL** | **~$90/bulan** |
+| 1 | `lb-dan-fe` | Nginx LB + Nginx Frontend | **20.255.63.132** | 10.0.0.5 | Standard_B2ats_v2 (2vCPU/1GB RAM) | Ubuntu 24.04 LTS | \$6.86 |
+| 2 | `app1-dan-db` | Flask + Gunicorn + MongoDB | 20.205.18.6 | 10.0.0.6 | Standard_B2als_v2 (2vCPU/4GB RAM) | Ubuntu 24.04 LTS | \$17.96 |
+| 3 | `app2` | Flask + Gunicorn | 20.2.80.145 | 10.0.0.9 | Standard_B2ats_v2 (2vCPU/1GB RAM) | Ubuntu 24.04 LTS | \$6.86 |
+| | | | | | | **TOTAL** | **\$31.86/bulan** |
 
 ### 2.3 Alasan Pemilihan Konfigurasi
 
 **Cloud Provider — Microsoft Azure:**
 Dipilih karena ketersediaan credit Azure for Students yang diterima kelompok. Region East Asia (Hongkong) dipilih untuk latensi yang relatif baik.
 
-**Tipe VM — Standard_B2s/B2als/B2ats (2vCPU, 4GB RAM):**
-Tipe B-series (burstable) memberikan performa yang cukup untuk workload intermittent seperti REST API. Dengan 2 vCPU, Gunicorn dapat dijalankan dengan 4 worker (formula `2×CPU+1`), cukup untuk melayani concurrent request tinggi. Memori 4GB memberikan ruang bagi MongoDB (cache WiredTiger 1GB) dan beberapa Gunicorn worker secara bersamaan.
+**Tipe VM — Standard_B2als_v2 (2vCPU, 4GB RAM) & Standard_B2ats_v2 (2vCPU, 1GB RAM):**
+Tipe B-series (burstable) memberikan performa yang cukup untuk workload intermittent seperti REST API. VM dengan memori 4GB (`app1-dan-db`) memberikan ruang yang cukup untuk menjalankan database MongoDB (dengan cache WiredTiger dibatasi ke 1GB) secara berdampingan dengan worker Flask/Gunicorn. VM dengan memori 1GB (`app2` dan `lb-dan-fe`) digunakan untuk menghemat biaya (cost-efficient) karena perannya yang lebih terfokus (hanya running backend Flask saja pada `app2` dan web server Nginx pada `lb-dan-fe`).
 
 **Penggabungan MongoDB + App1:**
 Dilakukan karena keterbatasan quota vCPU Azure (6 vCPU total). Penggabungan ini dikompensasi dengan konfigurasi `cacheSizeGB: 1.0` pada MongoDB agar tidak berebut RAM dengan Gunicorn worker.
