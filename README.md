@@ -64,6 +64,8 @@ Backend berupa REST API berbasis **Python (Flask)** dengan database **MongoDB**,
 
 ![Diagram Arsitektur Cloud](result/arsitektur.jpeg)
 
+[Link Diagram Arsitektur versi draw.io](https://app.diagrams.net/#G1XfG_8_EvuS7yBhC4bY8xcCoLG9TlbmEI#%7B"pageId"%3A"TylMhEfRKHi6sRPe35S_"%7D)
+
 > **Catatan:** Karena keterbatasan quota Azure (6 vCPU), MongoDB ditempatkan satu VM bersama app1 (`app1-dan-db`). Frontend digabung di VM load balancer (`lb-dan-fe`).
 
 ### 2.2 Tabel Spesifikasi VM dan Biaya
@@ -752,7 +754,7 @@ Final-project-TKA/
 │       └── locustfile.py        <- Script Load Testing (Locust)
 ├── result/                      <- Hasil screenshot bukti implementasi dan load testing
 │   ├── azure_vms.jpeg           (Daftar Virtual Machines di Azure Portal)
-|   ├── arsitektur_Cloud.jpeg  (Arsitektur Cloud — Order Processing Service (Azure))
+|   ├── arsitektur.jpeg          (Arsitektur Cloud — Order Processing Service (Azure))
 │   ├── app1_gunicorn.png        (Gunicorn running di App Server 1)
 │   ├── app2_gunicorn.png        (Gunicorn running di App Server 2)
 │   ├── ssh_lb.png               (Akses SSH ke Load Balancer VM)
